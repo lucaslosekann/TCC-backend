@@ -6,7 +6,7 @@ export default class Services extends BaseSchema {
   public async up () {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
-      table.integer('worker_id').unsigned().references('id').inTable('users')
+      table.integer('worker_id').unsigned().references('id').inTable('workers')
       table.integer('occupation_id').unsigned().references('id').inTable('occupations')
       table.float('suggested_price')
       /**

@@ -19,6 +19,6 @@ export default class Occupation extends BaseModel {
   @hasOne(() => File, {foreignKey: 'occupation_photo'})
   public occupationPhoto: HasOne<typeof File>
 
-  @hasMany(() => Service)
+  @hasMany(() => Service, {foreignKey: 'occupation_id'})
   public services: HasMany<typeof Service>
 }

@@ -15,6 +15,7 @@ const UserSchema = schema.create({
   ]),
   phone: schema.string({}, [
     rules.unique({ table: 'users', column: 'phone' }),
-  ])
+  ]),
+  isWorker: schema.boolean.optional(),
 })
 export default UserSchema

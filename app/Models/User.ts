@@ -1,11 +1,8 @@
 import { DateTime } from 'luxon'
 import Hash from '@ioc:Adonis/Core/Hash'
-import { column, beforeSave, BaseModel, hasOne, HasOne, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
+import { column, beforeSave, BaseModel, hasOne, HasOne } from '@ioc:Adonis/Lucid/Orm'
 import File from './File'
 import Address from './Address'
-import Deal from './Deal'
-import Service from './Service'
-import UserType from './UserType'
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
@@ -26,6 +23,9 @@ export default class User extends BaseModel {
   @column()
   public rememberMeToken?: string
 
+  @column()
+  public is_admin: boolean
+
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 
@@ -44,17 +44,4 @@ export default class User extends BaseModel {
 
   @hasOne(() => Address)
   public address: HasOne<typeof Address>
-
-  @hasOne(() => UserType)
-  public userType: HasOne<typeof UserType>
-
-  @hasMany(() => Deal, { foreignKey: 'user_id' })
-  public userDeals: HasMany<typeof Deal>
-
-  @hasMany(() => Deal, { foreignKey: 'worker_id' })
-  public workerDeals: HasMany<typeof Deal>
-
-  @hasMany(() => Service, { foreignKey: 'worker_id' })
-  public workerServices: HasMany<typeof Service>
-
 }

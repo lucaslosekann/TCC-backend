@@ -18,15 +18,29 @@
 |
 */
 
+import { Router } from '@adonisjs/core/build/standalone';
 import Route from '@ioc:Adonis/Core/Route'
 
 Route.group(() => {
+
   Route.post("register", "AuthController.register");
   Route.post("login", "AuthController.login");
+  Route.get("occupation", "OccupationsController.index");
+  Route.get("occupation/:id", "OccupationsController.show");
+
   Route.group(() => {
-    Route.resource("posts", "PostsController").apiOnly();
-    Route.resource("forums", "ForumsController").apiOnly();
-    Route.get("users/forums", "UsersController.forumsByUser");
-    Route.get("users/posts", "UsersController.postsByUser");
+    Route.get("me", "AuthController.me");
+    Route.post("logout", "AuthController.logout");
+    
+    Route.resource("service", "ServicesController")
+
+    Route.group(() => {
+      Route.post("occupation", "OccupationsController.store");
+      Route.delete("occupation", "OccupationsController.destroy");
+      Route.put("occupation", "OccupationsController.update");
+
+    }).prefix("admin").middleware("auth_admin");
+
   }).middleware("auth:api");
+
 }).prefix("api");

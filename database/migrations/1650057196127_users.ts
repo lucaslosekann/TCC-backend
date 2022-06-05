@@ -15,7 +15,6 @@ export default class UsersSchema extends BaseSchema {
       /**
        * Uses timestampz for PostgreSQL and DATETIME2 for MSSQL
        */
-      table.integer('user_type').unsigned().references('id').inTable('user_types')
       table.string('remember_me_token').nullable()
       table.timestamp('created_at', { useTz: true }).notNullable()
       table.timestamp('updated_at', { useTz: true }).notNullable()

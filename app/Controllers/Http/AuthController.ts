@@ -1,5 +1,7 @@
 import { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import Consumer from "App/Models/Consumer";
 import User from "App/Models/User";
+import Worker from "App/Models/Worker";
 import UserSchema from "App/Schemas/User";
 
 export default class AuthController {
@@ -16,15 +18,24 @@ export default class AuthController {
       const payload = await request.validate({
         schema: UserSchema
       })
-      const newUser = new User();
-      newUser.merge(payload)
-      await newUser.save();
+      const isWorker = payload.isWorker;
+      delete payload.isWorker;
+      const newUser = await User.create(payload);
+      if(isWorker){
+        await Worker.create({
+          userId: newUser.id
+        });
+      }else{
+        await Consumer.create({
+          userId: newUser.id
+        })
+      }
+
       const token = await auth.use("api").login(newUser, {
         expiresIn: "30 days",
       });
       return token.toJSON();
     } catch (error) {
-      console.log(error);
       response.badRequest(error.messages)
     }
   }
