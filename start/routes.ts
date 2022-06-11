@@ -27,12 +27,17 @@ Route.group(() => {
   Route.post("login", "AuthController.login");
   Route.get("occupation", "OccupationsController.index");
   Route.get("occupation/:id", "OccupationsController.show");
-
+  Route.get("file", "FilesController.show")
   Route.group(() => {
     Route.get("me", "AuthController.me");
     Route.post("logout", "AuthController.logout");
     
-    Route.resource("service", "ServicesController")
+    Route.resource("service", "ServicesController");
+
+    Route.post("address", "AddressesController.store");
+    Route.get("address/:id", "AddressesController.show");
+    Route.put("address", "AddressesController.update");
+    Route.delete("address", "AddressesController.destroy");
 
     Route.group(() => {
       Route.post("occupation", "OccupationsController.store");

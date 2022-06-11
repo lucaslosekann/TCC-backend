@@ -23,7 +23,7 @@ export default class Service extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
 
-  @belongsTo(() => Worker)
+  @belongsTo(() => Worker, { foreignKey: 'worker_id' })
   public worker: BelongsTo<typeof Worker>
 
   @belongsTo(() => Occupation, { foreignKey: 'occupation_id' })

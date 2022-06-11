@@ -1,5 +1,9 @@
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 const UserSchema = schema.create({
+  photo: schema.file.optional({
+    size:'2mb',
+    extnames: ['png','jpg']
+  }),
   email: schema.string({}, [
     rules.email(),
     rules.unique({ table: 'users', column: 'email' }),

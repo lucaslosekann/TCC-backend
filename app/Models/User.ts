@@ -1,8 +1,9 @@
 import { DateTime } from 'luxon'
 import Hash from '@ioc:Adonis/Core/Hash'
-import { column, beforeSave, BaseModel, hasOne, HasOne } from '@ioc:Adonis/Lucid/Orm'
+import { column, beforeSave, BaseModel, hasOne, HasOne, computed } from '@ioc:Adonis/Lucid/Orm'
 import File from './File'
 import Address from './Address'
+import UserPhoto from './UserPhoto'
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
@@ -10,6 +11,9 @@ export default class User extends BaseModel {
 
   @column()
   public email: string
+
+  @column()
+  public is_worker: boolean
 
   @column({ serializeAs: null })
   public password: string
@@ -39,9 +43,10 @@ export default class User extends BaseModel {
     }
   }
 
-  @hasOne(() => File, { foreignKey: 'user_photo' })
-  public userPhoto: HasOne<typeof File>
+  @hasOne(() => UserPhoto, { foreignKey: 'user_id' })
+  public userPhoto: HasOne<typeof UserPhoto>
 
-  @hasOne(() => Address)
+  @hasOne(() => Address, { foreignKey: 'user_id'} )
   public address: HasOne<typeof Address>
+
 }
