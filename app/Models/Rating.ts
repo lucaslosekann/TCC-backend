@@ -12,6 +12,9 @@ export default class Rating extends BaseModel {
   @column()
   public comment: string
 
+  @column()
+  public deal_id: number
+
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 

@@ -30,7 +30,11 @@
       "@adonisjs/repl",
       "@adonisjs/lucid",
       "@adonisjs/auth",
-      "@adonisjs/drive-s3"
+      "@adonisjs/drive-s3",
+      "@adonisjs/mail",
+      "@adonisjs/view",
+      "@adonisjs/redis",
+      "adonis-request-throttler"
     ]
   }
 }

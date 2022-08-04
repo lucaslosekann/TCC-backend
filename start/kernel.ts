@@ -42,5 +42,7 @@ Server.middleware.register([
 */
 Server.middleware.registerNamed({
    auth: () => import('App/Middleware/Auth'),
-   auth_admin: () => import('App/Middleware/AuthAdmin')
+   auth_admin: () => import('App/Middleware/AuthAdmin'),
+   anti_spam: 'Adonis/Addons/RequestThrottler/Middleware',
+   log: () => import('App/Middleware/Log')
 })

@@ -23,7 +23,7 @@ export default class Worker extends BaseModel {
   @belongsTo(() => User)
   public user: BelongsTo<typeof User>
 
-  @hasMany(() => Deal)
+  @hasMany(() => Deal, {foreignKey: 'worker_id'})
   public deals: HasMany<typeof Deal>
 
   @hasMany(() => Service)

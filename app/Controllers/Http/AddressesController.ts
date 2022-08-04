@@ -34,9 +34,9 @@ export default class AddressesController {
     const payload = await request.validate({
       schema: AddressUpdateSchema
     })
-    const address = await Address.findByOrFail('user_id', auth.user?.id as number);
-
-    await address.merge(payload).save()
+    delete Object.assign(payload, {['zip_code']: payload['zipCode'] })['zipCode'];
+    console.log(payload)
+    const address = await Address.updateOrCreate({'user_id': auth.user?.id as number}, {...payload, user_id: auth.user?.id});
     return address;
   }
 

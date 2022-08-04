@@ -29,6 +29,6 @@ export default class Service extends BaseModel {
   @belongsTo(() => Occupation, { foreignKey: 'occupation_id' })
   public occupation: BelongsTo<typeof Occupation>
 
-  @hasMany(() => ServicePhoto)
+  @hasMany(() => ServicePhoto, {foreignKey: 'service_id'})
   public photos: HasMany<typeof ServicePhoto>
 }

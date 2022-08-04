@@ -1,9 +1,9 @@
 import { DateTime } from 'luxon'
 import Hash from '@ioc:Adonis/Core/Hash'
-import { column, beforeSave, BaseModel, hasOne, HasOne, computed } from '@ioc:Adonis/Lucid/Orm'
-import File from './File'
+import { column, beforeSave, BaseModel, hasOne, HasOne, hasMany, HasMany } from '@ioc:Adonis/Lucid/Orm'
 import Address from './Address'
 import UserPhoto from './UserPhoto'
+import ApiToken from './ApiToken'
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
@@ -22,13 +22,16 @@ export default class User extends BaseModel {
   public name: string
 
   @column()
-  public phone: string
+  public phone: number
 
   @column()
   public rememberMeToken?: string
 
   @column()
   public is_admin: boolean
+
+  @column()
+  public notification_token?: string
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
@@ -48,5 +51,8 @@ export default class User extends BaseModel {
 
   @hasOne(() => Address, { foreignKey: 'user_id'} )
   public address: HasOne<typeof Address>
+
+  @hasMany(() => ApiToken, { foreignKey: 'userId'})
+  public tokens: HasMany<typeof ApiToken>
 
 }

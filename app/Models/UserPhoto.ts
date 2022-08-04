@@ -22,7 +22,7 @@ export default class UserPhoto extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
 
-  @hasOne(() => File, { foreignKey: 'id'})
+  @hasOne(() => File, { foreignKey: 'id', localKey: 'file_id'})
   public file: HasOne<typeof File>
 
   @belongsTo(() => User, { foreignKey: 'user_id' })

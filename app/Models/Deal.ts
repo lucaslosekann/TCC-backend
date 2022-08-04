@@ -12,6 +12,9 @@ export default class Deal extends BaseModel {
   @column()
   public price: number
 
+  @column()
+  public worker_id: number
+
   @column.dateTime({ columnName: 'agreement_date' })
   public agreementDate: DateTime
 

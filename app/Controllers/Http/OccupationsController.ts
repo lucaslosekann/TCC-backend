@@ -19,8 +19,7 @@ export default class OccupationsController {
     const occupation = Occupation.query().preload('services', (sQuery =>{
       sQuery.preload('worker', wQuery=>{
         wQuery.preload('user', uQuery=>{
-          uQuery.preload('userPhoto', upQuery=>{
-          })
+          uQuery.preload('userPhoto', photoQuery => photoQuery.preload('file'))
         })
       })
     })).select('*').where('id', request.params().id).firstOrFail();

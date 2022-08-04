@@ -7,6 +7,9 @@ export default class ServicePhoto extends BaseModel {
   @column({ isPrimary: true })
   public id: number
 
+  @column()
+  public service_id: number
+  
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 

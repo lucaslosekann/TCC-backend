@@ -1,7 +1,7 @@
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 const UserSchema = schema.create({
   photo: schema.file.optional({
-    size:'2mb',
+    size:'5mb',
     extnames: ['png','jpg']
   }),
   email: schema.string({}, [
@@ -15,9 +15,9 @@ const UserSchema = schema.create({
   name: schema.string({}, [
     rules.maxLength(50),
     rules.minLength(3),
-    rules.notIn(['admin', 'super', 'moderator', 'public', 'dev', 'alpha', 'mail']) // 👈
+    rules.notIn(['admin', 'super', 'moderator', 'public', 'dev', 'alpha', 'mail'])
   ]),
-  phone: schema.string({}, [
+  phone: schema.number([
     rules.unique({ table: 'users', column: 'phone' }),
   ]),
   isWorker: schema.boolean.optional(),
