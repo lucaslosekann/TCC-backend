@@ -1,5 +1,11 @@
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 const ServiceSchema = schema.create({
+  photos: schema.array.optional().members(
+    schema.file({
+      size:'10mb',
+      extnames: ['png','jpg']
+    })
+  ),
   suggestedPrice: schema.number.optional(),
   worker_occupation: schema.object([
     rules.uniqueCombination({table:'services', column1: 'worker_id', column2: 'occupation_id'})

@@ -17,7 +17,14 @@ export default class AuthController {
       const token = await auth.use("api").attempt(email, password, {
         expiresIn: "15 days",
       })
-      const user = await User.query().preload('userPhoto').select('*').where('id', auth.user?.id as any).firstOrFail();
+      const temp = await User.query().preload('userPhoto').select('*').where('id', auth.user?.id as any).firstOrFail();
+      let worker_id;
+      if(temp.is_worker){
+        const worker = await Worker.findBy('userId', temp.id);
+        worker_id = worker?.id;
+      }
+      let user = {...temp.serialize()} as any;
+      user = {...user, worker_id: worker_id || null}
       return {...token.toJSON(), user};
     } catch (error) {
       switch(error.responseText){
@@ -34,7 +41,6 @@ export default class AuthController {
   }
   public async register({ request, response, auth }: HttpContextContract) {
     try {
-      console.log('a')
       const payload = await request.validate({
         schema: UserSchema,
         messages: {
@@ -51,11 +57,13 @@ export default class AuthController {
       const photo = payload.photo;
       delete payload.photo;
       const newUser = await User.create({...payload, is_worker: isWorker});
+      let worker_id;
       if(isWorker){
         if(!!photo){
-          await Worker.create({
+          const worker = await Worker.create({
             userId: newUser.id
           });
+          worker_id = worker.id;
         }else{
           response.status(400).json({error: "Para ser um trabalhador é obrigatório inserir uma foto"})
         }
@@ -79,7 +87,9 @@ export default class AuthController {
       const token = await auth.use("api").login(newUser, {
         expiresIn: "7 days",
       });
-      const user = await User.query().preload('userPhoto').select('*').where('id', auth.user?.id as any).firstOrFail();
+      const temp = await User.query().preload('userPhoto').select('*').where('id', auth.user?.id as any).firstOrFail();
+      let user = {...temp.serialize()} as any;
+      user = {...user, worker_id: worker_id || null}
       return {...token.toJSON(), user};
     } catch (error) {
       console.log(error);

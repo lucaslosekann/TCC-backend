@@ -22,7 +22,11 @@ Route.group(() => {
     Route.get("me", "UsersController.show");
     Route.post("logout", "AuthController.logout");
     Route.put("updateNotificationToken", "UsersController.updateNotificationToken")
-    // Route.resource("service", "ServicesController");
+
+    Route.post("service", "ServicesController.store");
+    Route.get("service", "ServicesController.index");
+    Route.delete("service", "ServicesController.index");
+    Route.put("service", "ServicesController.update");
 
     Route.post("address", "AddressesController.store");
     Route.get("address/:id", "AddressesController.show");
@@ -34,7 +38,6 @@ Route.group(() => {
       Route.post("occupation", "OccupationsController.store");
       Route.delete("occupation", "OccupationsController.destroy");
       Route.put("occupation", "OccupationsController.update");
-
     }).prefix("admin").middleware("auth_admin");
 
   }).middleware("auth:api");

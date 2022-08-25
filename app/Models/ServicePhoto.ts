@@ -10,13 +10,16 @@ export default class ServicePhoto extends BaseModel {
   @column()
   public service_id: number
   
+  @column()
+  public file_id: number
+  
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
 
-  @hasOne(() => File, { foreignKey: 'file_id' })
+  @hasOne(() => File, { foreignKey: 'id', localKey: 'file_id' })
   public file: HasOne<typeof File>
 
   @belongsTo(() => Service, { foreignKey: 'service_id' })
