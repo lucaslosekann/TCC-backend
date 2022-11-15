@@ -3,6 +3,7 @@ import { BaseModel, BelongsTo, belongsTo, column, HasMany, hasMany } from '@ioc:
 import Occupation from './Occupation'
 import ServicePhoto from './ServicePhoto'
 import Worker from './Worker'
+import Deal from './Deal'
 
 export default class Service extends BaseModel {
   @column({ isPrimary: true })
@@ -13,6 +14,9 @@ export default class Service extends BaseModel {
 
   @column()
   public worker_id: number
+
+  @column()
+  public active: boolean
 
   @column()
   public occupation_id: number
@@ -31,4 +35,7 @@ export default class Service extends BaseModel {
 
   @hasMany(() => ServicePhoto, {foreignKey: 'service_id'})
   public photos: HasMany<typeof ServicePhoto>
+
+  @hasMany(() => Deal, {foreignKey: 'service_id'})
+  public deals: HasMany<typeof Deal>
 }

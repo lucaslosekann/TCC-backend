@@ -17,5 +17,7 @@ export default async function notificate(token:string, title: string, body: stri
             'Accept-encoding': 'gzip, deflate',
             'Content-Type': 'application/json',
           },
-      }).catch(console.log);
+      }).catch(e=>{
+        console.log(e.response.data.erros)
+      });
 } 

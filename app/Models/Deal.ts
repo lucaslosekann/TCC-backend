@@ -4,8 +4,12 @@ import { BaseModel, column, belongsTo, BelongsTo, hasMany, HasMany } from '@ioc:
 import Rating from './Rating'
 import Worker from './Worker'
 import Consumer from './Consumer'
+import User from './User'
+import Service from './Service'
 
 export default class Deal extends BaseModel {
+  public serializeExtras = true
+  
   @column({ isPrimary: true })
   public id: number
 
@@ -14,6 +18,18 @@ export default class Deal extends BaseModel {
 
   @column()
   public worker_id: number
+
+  @column()
+  public consumer_id: number
+
+  @column()
+  public service_id: number
+
+  @column()
+  public offer_id: number
+  
+  @column()
+  public status: 'active' | 'closed'
 
   @column.dateTime({ columnName: 'agreement_date' })
   public agreementDate: DateTime
@@ -24,12 +40,15 @@ export default class Deal extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
 
-  @belongsTo(() => Consumer)
-  public consumer: BelongsTo<typeof Consumer>
+  @belongsTo(() => User, { foreignKey: 'consumer_id'})
+  public consumer: BelongsTo<typeof User>
 
-  @belongsTo(() => Worker)
+  @belongsTo(() => Worker, { foreignKey: 'worker_id'})
   public worker: BelongsTo<typeof Worker>
 
-  @hasMany(() => Rating)
+  @belongsTo(() => Service, { foreignKey: 'service_id'})
+  public service: BelongsTo<typeof Service>
+
+  @hasMany(() => Rating, {foreignKey: 'deal_id'})
   public ratings: HasMany<typeof Rating>
 }

@@ -28,4 +28,6 @@ export default class Worker extends BaseModel {
 
   @hasMany(() => Service)
   public services: HasMany<typeof Service>
+
+  public serializeExtras = true
 }

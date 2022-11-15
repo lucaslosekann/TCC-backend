@@ -34,7 +34,14 @@ export default class AuthMiddleware {
 
     for (let guard of guards) {
       guardLastAttempted = guard
-
+      if(guard == 'web'){
+        if(await auth.use(guard).check()){
+          auth.defaultGuard = guard
+          return 'web_ok';
+        }else{
+          return 'web_fail';
+        }
+      }
       if (await auth.use(guard).check()) {
         /**
          * Instruct auth to use the given guard as the default guard for
@@ -61,7 +68,7 @@ export default class AuthMiddleware {
    * Handle request
    */
   public async handle (
-    { auth }: HttpContextContract,
+    { auth, response }: HttpContextContract,
     next: () => Promise<void>,
     customGuards: (keyof GuardsList)[]
   ) {
@@ -70,7 +77,10 @@ export default class AuthMiddleware {
      * the config file
      */
     const guards = customGuards.length ? customGuards : [auth.name]
-    await this.authenticate(auth, guards)
+    const result = await this.authenticate(auth, guards)
+    if(result == 'web_fail'){
+      return response.redirect('/login');
+    }
     await next()
   }
 }

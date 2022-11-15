@@ -34,7 +34,8 @@
       "@adonisjs/mail",
       "@adonisjs/view",
       "@adonisjs/redis",
-      "adonis-request-throttler"
+      "adonis-request-throttler",
+      "@adonisjs/session"
     ]
   }
 }

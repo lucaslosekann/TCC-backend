@@ -22,4 +22,24 @@ const UserSchema = schema.create({
   ]),
   isWorker: schema.boolean.optional(),
 })
+export const LoginSchema = schema.create({
+  email: schema.string({}, [
+    rules.email()
+  ]),
+  password: schema.string({}, [
+    rules.minLength(6),
+  ]),
+})
+export const ChangePasswordSchema = schema.create({
+  password_old: schema.string(),
+  password: schema.string({}, [
+    rules.minLength(6),
+  ]),
+})
+export const ChangePhotoSchema = schema.create({
+  photo: schema.file({
+    size:'5mb',
+    extnames: ['png','jpg']
+  }),
+})
 export default UserSchema

@@ -1,30 +1,27 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
 
-export default class Message extends BaseModel {
+export default class Offer extends BaseModel {
   @column({ isPrimary: true })
   public id: number
 
   @column()
-  public to: number
+  public price: number
 
   @column()
-  public from: number
+  public type: 'offer' | 'counter-offer'
 
   @column()
-  public text: string
+  public offer_id?: number
 
   @column()
-  public room: string
+  public consumer_id: number
 
   @column()
-  public pending: boolean
-  
-  @column()
-  public instant: string
+  public service_id: number
 
   @column()
-  public type: string
+  public worker_id: number
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime

@@ -19,7 +19,7 @@ export default class ResetPasswordsController {
 
     await token.load('user')
     const user = token.user;
-
+    
     user.password = payload.password;
     await user.save()
     await token.delete()

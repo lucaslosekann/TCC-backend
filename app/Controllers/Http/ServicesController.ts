@@ -17,10 +17,11 @@ export default class ServicesController {
     try {
       if (auth.user?.is_worker) {
         const worker = await Worker.findByOrFail('userId', auth.user.id)
-        const services = await Service.query()
+        let services = await Service.query()
           .where('worker_id', '=', worker?.id as number)
           .preload('occupation')
           .preload('photos', pQuery => pQuery.preload('file'))
+        
         return services;
       } else {
         response.status(400).json({ error: 'Usuário deve ser um trabalhador' })
@@ -84,11 +85,21 @@ export default class ServicesController {
   }
 
   public async show({ request }: HttpContextContract) {
-    const service = await Service.query()
+    let service = await Service.query()
       .preload('occupation')
       .preload('worker', (wQuery) => wQuery.preload('user', (uQuery) => uQuery.preload('userPhoto', (pQuery) => pQuery.preload('file'))))
       .preload('photos', pQuery => pQuery.preload('file'))
-      .select('*').where('id', request.params().id as number).firstOrFail() as any;
+      .select('*').where('id', request.params().id as number).firstOrFail();
+      for (let i in service.photos) {
+        let p = service.photos[i];
+        if(p.file){
+          let path = await Drive.getSignedUrl(p.file.path)
+          service.photos[i].file.path = path
+        }
+      }
+    if(service.worker.user.userPhoto){
+      service.worker.user.userPhoto.file.path = await Drive.getSignedUrl(service.worker.user.userPhoto.file.path)
+    }
     let totalDeals = (await Deals.query().where('worker_id', '=', service.worker_id).count('* as total'))
     totalDeals = totalDeals[0].$extras.total
     return { workerTotalDeals: totalDeals, ...service.toJSON() };
@@ -137,33 +148,36 @@ export default class ServicesController {
       console.log(e.messages.errors)
     }
     return;
-    // const temp = await request.validate({
-    //   schema: ServiceSchema
-    // });
-    // const service = await Service.findOrFail(request.params().id)
-
-    // const payload = {suggestedPrice: temp.suggestedPrice};
-    // const worker = await Worker.findBy('userId', auth.user?.id);
-    // if(service.worker_id != worker?.id){
-    //   throw new AuthenticationException(
-    //     'Unauthorized access',
-    //     'E_UNAUTHORIZED_ACCESS'
-    //   )
-    // }
-
-    // await service.merge(payload).save()
-    // return service;
   }
 
-  public async destroy({ request, auth }: HttpContextContract) {
-    const service = await Service.findOrFail(request.params().id)
-    const worker = await Worker.findBy('userId', auth.user?.id);
-    if (service.worker_id != worker?.id) {
-      throw new AuthenticationException(
-        'Unauthorized access',
-        'E_UNAUTHORIZED_ACCESS'
-      )
+  public async toggle({ request, auth, response }: HttpContextContract) {
+    try {
+      const id = request.input('id')
+      const service = await Service.findOrFail(id)
+      const worker = await Worker.findBy('userId', auth.user?.id);
+      if (service.worker_id != worker?.id) {
+        return response.status(401).json({ error: 'Serviço não pertencente ao usuário logado' })
+      }
+      service.active = !service.active
+      await service.save()
+      return true
+    } catch (error) {
+      console.log(error)
+      response.status(500).json({error: "Erro"})
     }
-    await service.delete()
+  }
+
+  public async worker({request}: HttpContextContract){
+    try{
+      const worker = await Worker.findBy('userId', request.params().id as number);
+      const services = await Service.query()
+        .preload('occupation')
+        .preload('worker', (wQuery) => wQuery.preload('user', (uQuery) => uQuery.preload('userPhoto', (pQuery) => pQuery.preload('file'))))
+        .preload('photos', pQuery => pQuery.preload('file'))
+        .select('*').where('worker_id', worker?.id as number).exec();
+      return services.map((service) => service.serialize());
+    }catch(e){
+      console.log(e)
+    }
   }
 }

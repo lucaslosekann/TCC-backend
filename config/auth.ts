@@ -32,6 +32,17 @@ const authConfig: AuthConfig = {
     | on cookies/sessions.
     |
     */
+
+    web: {
+      driver: 'session',
+
+      provider: {
+        driver: 'lucid',
+        identifierKey: 'id',
+        uids: ['email'],
+        model: () => import('App/Models/User'),
+      },
+    },
     api: {
       driver: 'oat',
 

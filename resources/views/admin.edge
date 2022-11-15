@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script src="https://kit.fontawesome.com/49d2460b2a.js" crossorigin="anonymous"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,500;0,600;0,700;0,800;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+  <title>Admin</title>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Administrador, autenticado como {{user.name.split(' ')[0]}}</h1>
+      <a href="logout">SAIR</a>
+    </div>
+    <div class="main">
+      <div class="form_container">
+        @if(editing)
+          <h2>Editar Profissão</h2>
+          <div class="edit">
+            <div>Editando profissão: {{editing.name}}</div>
+            <a href="/">Sair do modo edição</a>
+          </div>
+        @else
+          <h2>Adicionar Profissão</h2>
+        @endif
+        <form action="{{editing ? 'edit_occupation' : 'occupation'}}" method="post" enctype="multipart/form-data">
+          <div class="input">
+            <label for="occupation_name">Nome da Profissão:</label>
+            <input type="text" required name="occupation_name" id="occupation_name" placeholder="Ex: Veterinária" value="{{editing?.name ?? ''}}">
+          </div>
+          <div>
+            <div class="preview_container" style="display:{{editing?.occupationPhoto ? 'flex' : 'none'}};">
+              <img id="preview" src="{{editing?.occupationPhoto?.path ?? ''}}" alt="preview da foto">
+              <div class="overlay">
+                <a href="#" class="icon" title="Remove Img">
+                  <i class="fa-solid fa-trash"></i>
+                </a>
+              </div>
+            </div>
+            <div class="file_container" style="display:{{editing?.occupationPhoto ? 'none' : 'flex'}};">
+              <label for="file_input"><i class="fa-solid fa-image"></i></label>
+              <input accept="image/*" id="file_input" type="file" name="photo" id="occupation_photo">
+            </div>
+          </div>
+          @if(editing)
+            <input id="nochange" type="hidden" name="nochange" value='true'>
+          @endif
+          <button type="submit">Enviar</button>
+          @if(erro)
+            <span class="errorMessage">Ocorreu um erro, por favor tente mais tarde</span>
+          @endif
+          @if(editing)
+            <input type="hidden" name="id" value={{editing.id}}>
+          @endif
+        </form>
+      </div>
+      <div class="list_container">
+        <h2>Profissões</h2>
+        <ul>
+          @each((prof, i) in occupations)
+            <li 
+            @if(i%2 == 0)
+              class="even"           
+            @else
+              class="odd"           
+            @endif
+            > 
+              <div class="left">
+                @if(prof.occupationPhoto)
+                  <img class="occ_img" src="{{prof?.occupationPhoto?.path}}" alt="foto da profissao">            
+                @endif
+                <span>
+                  {{ prof.name }}
+                </span>
+              </div>
+              <div class="right">
+                <button class="del" onclick="if(confirm('Tem certeza?'))window.location.href = 'del_occupation?id={{prof.id}}'"><i class="fa-solid fa-trash"></i></button>
+                <a href="?id={{prof.id}}"><i class="fa-solid fa-pen"></i></a>
+              </div>
+            </li>
+          @end
+        </ul>
+      </div>
+    </div>
+  </div>
+</body>
+<script>
+  const input = document.getElementById('file_input');
+  const fileContainer = document.querySelector('.file_container');
+  const preview = document.getElementById('preview');
+  const preview_container = document.querySelector('.preview_container');
+  document.querySelector('a.icon').addEventListener('click',()=>{
+    input.value = '';
+    @if(editing)
+    document.getElementById('nochange').value="false";
+    @endif
+    preview_container.style.display='none';
+    fileContainer.style.display="flex";
+  })
+  input.onchange = evt => {
+    @if(editing)
+    document.getElementById('nochange').value="false";
+    @endif
+    const [file] = input.files
+    if (file) {
+      preview_container.style.display='flex';
+      preview.src = URL.createObjectURL(file)
+      fileContainer.style.display="none";
+    }
+  }
+</script>
+</html>

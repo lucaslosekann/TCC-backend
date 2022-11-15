@@ -1,30 +1,24 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
 
-export default class Message extends BaseModel {
+export default class Notification extends BaseModel {
   @column({ isPrimary: true })
   public id: number
 
   @column()
-  public to: number
+  public receiver_id: number
 
   @column()
-  public from: number
+  public sender_name: string
 
   @column()
-  public text: string
+  public sender_id: number
 
   @column()
-  public room: string
+  public message_type: string
 
   @column()
-  public pending: boolean
-  
-  @column()
-  public instant: string
-
-  @column()
-  public type: string
+  public content: string
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime

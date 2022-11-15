@@ -1,6 +1,9 @@
 import authenticate from 'App/Middleware/AuthSocketIO';
 import Message from 'App/Models/Message';
+import Notification from 'App/Models/Notification';
+import Offer from 'App/Models/Offer';
 import User from 'App/Models/User';
+import Worker from 'App/Models/Worker';
 import notificate from 'App/Services/PushNotifications';
 import Ws from 'App/Services/Ws'
 import { Socket } from 'socket.io';
@@ -17,6 +20,21 @@ Ws.io.on('connection', async (socket: Socket) => {
       if(payload.from == user.id && !!validateId(payload.room, user?.id)){
         const clients = Ws.io.sockets.adapter.rooms.get(payload.room);
         const numClients = clients ? clients.size : 0;
+        let offer;
+        if(payload?.message_type == 'proposal'){
+          let {price, service_id, type} = JSON.parse(payload.text);
+          const worker = await Worker.findBy('userId', payload.to);
+          let data = {
+            consumer_id: payload.from,
+            worker_id: worker?.id,
+            price,
+            type,
+            service_id
+          } as any;
+          offer = await Offer.create(data);
+          payload.text = JSON.stringify({...JSON.parse(payload.text), offer_id: offer.id})
+        }
+        socket.emit('my_message', payload);
         if(numClients < 2){
           try{
             await Message.create({
@@ -24,20 +42,32 @@ Ws.io.on('connection', async (socket: Socket) => {
               from: payload.from,
               instant: payload.instant,
               text: payload.text,
-              room: payload.room
+              room: payload.room,
+              type: payload?.message_type
             })
-            const receiver = await User.find(payload.to)
-            if(!receiver?.notification_token)return;
-            const sender = await User.findOrFail(payload.from)
 
-            notificate(receiver.notification_token, sender?.name, payload.text, {from: payload.from, senderName: sender?.name})
+            const sender = await User.findOrFail(payload.from)
+            const receiver = await User.find(payload.to)
+
+            if(!receiver?.notification_token){
+              Notification.create({
+                receiver_id: payload.to,
+                sender_name: sender?.name,
+                sender_id: payload.from,
+                message_type: payload.message_type
+              })
+              return;
+            };
+            notificate(receiver.notification_token, 
+              sender?.name,
+                payload?.message_type == 'proposal' ? 'Você recebeu uma proposta!' : payload.text,
+                 {from: payload.from, senderName: sender?.name})
           }catch(e){
             console.log(e)
           }
           return
         }
         socket.to(payload.room).emit("receive_message", payload);
-        console.log(payload)
       }
     })
     socket.on('join-room', async (roomId)=>{

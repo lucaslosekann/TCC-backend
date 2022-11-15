@@ -2,11 +2,11 @@ import { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import Consumer from "App/Models/Consumer";
 import User from "App/Models/User";
 import Worker from "App/Models/Worker";
-import UserSchema from "App/Schemas/User";
+import UserSchema, { ChangePasswordSchema, ChangePhotoSchema } from "App/Schemas/User";
 import Drive from '@ioc:Adonis/Core/Drive'
 import UserPhoto from "App/Models/UserPhoto";
 import File from "App/Models/File";
-
+import Hash from '@ioc:Adonis/Core/Hash'
 
 
 export default class AuthController {
@@ -52,21 +52,17 @@ export default class AuthController {
           'photo.file.size': 'A foto deve ter menos de 5MB',
         }
       })
-      const isWorker = payload.isWorker;
+      const isWorker = true;
       delete payload.isWorker;
       const photo = payload.photo;
       delete payload.photo;
       const newUser = await User.create({...payload, is_worker: isWorker});
       let worker_id;
       if(isWorker){
-        if(!!photo){
           const worker = await Worker.create({
             userId: newUser.id
           });
           worker_id = worker.id;
-        }else{
-          response.status(400).json({error: "Para ser um trabalhador é obrigatório inserir uma foto"})
-        }
       }else{
         await Consumer.create({
           userId: newUser.id
@@ -106,6 +102,52 @@ export default class AuthController {
     await auth.use('api').revoke()
     return {
       revoked: true
+    }
+  }
+  public async changePassword({ auth, response, request }: HttpContextContract){
+    try {
+      const payload = await request.validate({
+        schema: ChangePasswordSchema,
+      })
+      const match = await Hash.verify(auth.user?.password as any, payload.password_old)
+      if(!match){
+        return response.status(403).json({error: "A senha não corresponde à atual"})
+      }
+      const user = await User.findOrFail(auth.user?.id)
+      user.password = payload.password
+      await user.save()
+      return true;
+    } catch (error) {
+      response.status(500).json({error: "Erro"})
+    }
+  }
+  public async changePhoto({ auth, response, request }: HttpContextContract){
+    try {
+      const payload = await request.validate({
+        schema: ChangePhotoSchema,
+      })
+      const user = await User.findOrFail(auth.user?.id)
+      const photo = await UserPhoto.findByOrFail('user_id', user.id)
+      const file = await File.findOrFail(photo.file_id);
+      const old_photo_path = file.path;
+
+      const new_photo = payload.photo;
+      const name = `${auth.user?.id}-${Date.now()}`;
+      await new_photo?.moveToDisk('profileImages',{
+        name
+      }, 's3')
+      const fileInfo = await Drive.getStats(`profileImages/${name}`)
+      file.cloudId = fileInfo.etag as string;
+      file.drive = 's3'
+      file.mimeType = new_photo.extname as string;
+      file.path = `profileImages/${name}`
+      file.size = fileInfo.size;
+      await file.save()
+      await Drive.delete(old_photo_path)
+      return true;
+    } catch (error) {
+      console.log(error)
+      response.status(500).json({error: "Erro"})
     }
   }
 }

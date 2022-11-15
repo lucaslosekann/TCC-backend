@@ -5,8 +5,7 @@ import Env from '@ioc:Adonis/Core/Env'
 export default class LogsController {
     public async index({ request }: HttpContextContract) {
         if(request.qs().senha == Env.get('LOGS_PASS')){
-            const logs = Log.all()
-            return logs
+            return await Log.all() 
         }else{
             return 'PRECISA DE SENHA BURRAO'
         }

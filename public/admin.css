@@ -1,0 +1,242 @@
+body{
+  background-color: #303030;
+  color:white;
+  font-family: 'Nunito', sans-serif;
+}
+.container{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+}
+.header{
+  text-align: center ;
+}
+.header a{
+  text-decoration: none;
+  font-size: large;
+  color: white;
+  background-color: #FA9032;
+  padding: 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+i{
+  color: #FA9032;
+  font-size: xx-large;
+  cursor: pointer;
+}
+.main{
+  width: 100%;
+  display: flex;
+  justify-content:center;
+  flex-direction: row;
+}
+.main>div{
+  padding: 20px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+h2{
+  text-align: center;
+}
+button[type='submit']{
+  margin-top: 10px;
+}
+form{
+  display: flex;
+  flex-direction: column;
+}
+.del{
+  text-decoration: none;
+  color: red;
+  background-color: transparent;
+  border: none;
+}
+.input{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  border-radius: 10
+}
+.input input{
+  width: 100%;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-right: 5px;
+  padding-left: 5px;
+  font-size: 16px;
+  font-family: 'Nunito', sans-serif;
+  color: #e5e5e5;
+  background-color: transparent;
+  border: none;
+  border-bottom: #ccc 1px solid;
+}
+.input input:focus{
+  outline: none;
+}
+.errorMessage {
+  font-size: 16px;
+  color: rgba(200,0,50,1);
+  letter-spacing: 0.2px;
+  text-align: 'center';
+}
+.input label {
+  font-size: 16px;
+  color: #ccc;
+  margin-bottom: -4px;
+  margin-left: 5;
+  font-family: 'Nunito', sans-serif;
+}
+input[type="file"]{
+  display: none;
+}
+.file_container{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+#preview{
+  object-fit: cover;
+  width: 230px;
+  height: 230px;
+}
+.occ_img{
+  object-fit: cover;
+  width: 100px;
+  aspect-ratio: 1/1;
+}
+
+.preview_container {
+  position: relative;
+  justify-content: center;
+}
+
+/* The overlay effect (full height and width) - lays on top of the container and over the image */
+.overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  opacity: 0;
+  transition: .3s ease;
+}
+
+/* When you mouse over the container, fade in the overlay icon*/
+.preview_container:hover .overlay {
+  opacity: 1;
+}
+
+/* The icon inside the overlay is positioned in the middle vertically and horizontally */
+.icon {
+  color: white;
+  font-size: 100px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+/* When you move the mouse over the icon, change color */
+.fa-trash{
+  color:white;
+}
+.fa-trash:hover {
+  color: red;
+}
+button[type="submit"]{
+  font-size: large;
+  color: white;
+  background-color: #FA9032;
+  padding: 4px;
+  border-radius: 8px;
+  cursor: pointer;
+  padding-left: 15px;
+  padding-right: 15px;
+  outline: none;
+  border: none;
+}
+li{
+  padding: 5px;
+  margin-bottom: 5px;
+  list-style: none;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+}
+.even{
+  background-color: #666;
+}
+.odd{
+  background-color: #262626;
+}
+
+li .left{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+li .left span{
+  margin-left: 10px;
+}
+
+li .right{
+  padding-left: 15px;
+  padding-right: 15px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+li .right .fa-solid{
+  padding: 10px;
+  font-size: medium;
+}
+.edit a{
+  text-decoration: none;
+  color: #FA9032;
+  font-family: 'Nunito' sans-serif;
+}
+.edit{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+
+
+@media (max-width: 800px)
+{
+  .main{
+    flex-direction: column;
+    align-items: center;
+    width: 90%;
+  }
+  .main>div{
+    width: 105%;
+    padding: 0;
+    margin: 0;
+  }
+  .main ul{
+    padding-left: 0;
+  }
+  li .right{
+    padding-right: 0;
+    margin-right: 0;
+  }
+  li{
+    width: auto;
+  }
+  img.occ_img{
+    width: 80px;
+  }
+}
