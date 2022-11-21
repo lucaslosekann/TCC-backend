@@ -1,15 +1,18 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database';
 import Deal from 'App/Models/Deal';
+import Notification from 'App/Models/Notification';
 import Offer from 'App/Models/Offer';
 import Rating from 'App/Models/Rating';
+import User from 'App/Models/User';
 import Worker from 'App/Models/Worker';
-import DealSchema, { FinishDealSchema } from 'App/Schemas/Deals';
+import DealSchema, { CancelDealSchema, FinishDealSchema } from 'App/Schemas/Deals';
+import notificate from 'App/Services/PushNotifications';
 
 export default class DealsController {
   public async index({auth}: HttpContextContract) {
     const deals = await Database.rawQuery(
-      `select o.name as occ, c.name as c_name, wU.name as w_name, s.suggested_price as sug_price, d.*
+      `select o.name as occ, c.name as c_name, wU.name as w_name, d.*
       from deals d
       inner join services s on s.id = d.service_id 
       inner join occupations o on o.id = s.occupation_id
@@ -36,6 +39,7 @@ export default class DealsController {
         return response.status(400).json({ error: 'Esta oferta já foi aceita!' })
       }
       const offer = await Offer.findOrFail(payload.offer_id);
+      //@ts-ignore
       if(Math.abs(offer.createdAt.diffNow('hours').values.hours) > 24){
         return response.status(400).json({ error: 'Esta oferta já expirou!' })
       }
@@ -50,12 +54,16 @@ export default class DealsController {
       }
 
       const newDeal = await Deal.create({
-        price: offer.price,
         offer_id: offer.id,
-
-        // agreementDate: new Date(Date.now()),
         ...data      
       });
+
+      const sender = await User.findOrFail(userWorker.userId)
+      const receiver = await User.findOrFail(offer.consumer_id)
+
+      if(!receiver?.notification_token)return newDeal;
+      notificate(receiver.notification_token, 
+        sender?.name, `${sender?.name} aceitou sua oferta!`,{type: 'notification', redirect: 'DealsTab'})
       return newDeal;
     }catch (error) {
       switch (error.message) {
@@ -95,7 +103,45 @@ export default class DealsController {
         rating: payload.rating,
         deal_id: payload.deal_id
       })
+      const userWorker = await Worker.findOrFail(deal.worker_id);
+      const receiver = await User.findOrFail(userWorker.userId)
+      const sender = await User.findOrFail(deal.consumer_id)
+      if(!receiver?.notification_token)return rating;
+      notificate(receiver.notification_token, 
+        sender?.name, `${sender?.name} avaliou seu serviço!`,{type: 'notification', redirect: 'DealsTab'})
       return rating
+    }catch(e){
+      console.log(e)
+      return response.status(500).json({ error: 'Erro desconhecido' })
+    }
+  }
+  public async cancel({ request, auth, response }: HttpContextContract) {
+    try{
+      const payload = await request.validate({
+        schema: CancelDealSchema
+      });
+      const worker = await Worker.findByOrFail('user_id', auth?.user?.id as number)
+
+      const deal = await Deal.findOrFail(payload.deal_id);
+      if(worker.id != deal.worker_id){
+        return response.status(500).json({ error: 'Erro desconhecido' })
+      }
+      if(deal.status != 'active'){
+        return response.status(500).json({ error: 'Erro desconhecido' })
+      }
+      deal.status = 'cancelled';
+      deal.cancelement_reason = payload.reason;
+      await deal.save()
+
+      const sender = await User.findOrFail(auth?.user?.id)
+      const receiver = await User.findOrFail(deal.consumer_id)
+
+      if(!receiver?.notification_token)return deal;
+
+      notificate(receiver.notification_token, 
+        sender?.name, `${sender?.name} cancelou um contrato com você!`,{type: 'notification', redirect: 'DealsTab'})
+
+      return deal;
     }catch(e){
       console.log(e)
       return response.status(500).json({ error: 'Erro desconhecido' })

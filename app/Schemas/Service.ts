@@ -6,7 +6,6 @@ const ServiceSchema = schema.create({
       extnames: ['png','jpg']
     })
   ),
-  suggestedPrice: schema.number.optional(),
   worker_occupation: schema.object([
     rules.uniqueCombination({table:'services', column1: 'worker_id', column2: 'occupation_id'})
   ]).members({

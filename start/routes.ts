@@ -4,13 +4,21 @@ import Route from '@ioc:Adonis/Core/Route'
 
 Route.get('login', "LoginController.index");
 Route.post('login', "LoginController.store");
+Route.get('googleRedirect', ({ally})=>{
+  return ally.use('google').redirect()
+})
+Route.get('google', "SocialsController.google")
 Route.group(()=>{
   Route.get('logout', 'LoginController.destroy');
   Route.get('/', 'AdminsController.index');
+
   Route.post("occupation", "OccupationsController.store");
   Route.get("del_occupation", "OccupationsController.destroy");
-  Route.get("p", "FilesController.key");
   Route.post("edit_occupation", "OccupationsController.update");
+
+  Route.get("del_suggestion/:id", "SuggestionsController.destroy");
+
+  Route.get("p", "FilesController.key");
 }).middleware('auth:web').middleware("web_admin");
 Route.get("file", "FilesController.show")
 Route.group(() => {
@@ -32,11 +40,13 @@ Route.group(() => {
   Route.get("avaragerating/:worker_id", "RatingsController.avarageRating")
   
   Route.group(() => {
+    Route.get("unread/:roomid", "MessagesController.index");
     Route.get("me", "UsersController.show");
     Route.post("logout", "AuthController.logout");
     Route.put("updateNotificationToken", "UsersController.updateNotificationToken")
     Route.post("changePassword", "AuthController.changePassword");
     Route.post("changePhoto", "AuthController.changePhoto");
+    Route.post("removePhoto", "AuthController.removePhoto");
 
     Route.post("service", "ServicesController.store");
     Route.get("service", "ServicesController.index");
@@ -44,9 +54,12 @@ Route.group(() => {
     Route.post("service_toggle", "ServicesController.toggle");
     Route.put("service", "ServicesController.update");
 
+    Route.post("suggestion", "SuggestionsController.store");
+
     Route.post("deal", "DealsController.store");
     Route.get("deal", "DealsController.index");
     Route.post("finishDeal", "DealsController.destroy");
+    Route.post("cancelDeal", "DealsController.cancel");
 
     Route.get("userChat/:id", "UsersController.getChatInfoByUser");
 

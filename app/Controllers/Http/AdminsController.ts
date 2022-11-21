@@ -1,6 +1,7 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Occupation from 'App/Models/Occupation';
 import Drive from '@ioc:Adonis/Core/Drive'
+import Suggestion from 'App/Models/Suggestion';
 
 export default class AdminsController {
   public async index({auth, view, session, request, response}: HttpContextContract) {
@@ -24,10 +25,12 @@ export default class AdminsController {
           editing.occupationPhoto.path = path
         }
       }
+      const suggestions = await Suggestion.all();
       return view.render('admin', {
         user: auth?.user,
         occupations: occ,
         erro,
+        suggestions,
         editing
       });
     } catch (e) {

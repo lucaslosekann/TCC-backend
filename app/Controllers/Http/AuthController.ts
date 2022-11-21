@@ -127,24 +127,55 @@ export default class AuthController {
         schema: ChangePhotoSchema,
       })
       const user = await User.findOrFail(auth.user?.id)
-      const photo = await UserPhoto.findByOrFail('user_id', user.id)
-      const file = await File.findOrFail(photo.file_id);
-      const old_photo_path = file.path;
+      const photo = await UserPhoto.findBy('user_id', user.id)
+      if(!!photo){
+        const file = await File.findOrFail(photo.file_id);
+        const old_photo_path = file.path;
+  
+        const new_photo = payload.photo;
+        const name = `${auth.user?.id}-${Date.now()}`;
+        await new_photo?.moveToDisk('profileImages',{
+          name
+        }, 's3')
+        const fileInfo = await Drive.getStats(`profileImages/${name}`)
+        file.cloudId = fileInfo.etag as string;
+        file.drive = 's3'
+        file.mimeType = new_photo.extname as string;
+        file.path = `profileImages/${name}`
+        file.size = fileInfo.size;
+        await file.save()
+        await Drive.delete(old_photo_path)
+        return true;
+      }else{
+        const new_photo = payload.photo;
+        const name = `${auth.user?.id}-${Date.now()}`;
+        await new_photo?.moveToDisk('profileImages',{
+          name
+        }, 's3')
+        const fileInfo = await Drive.getStats(`profileImages/${name}`)
+        const file = await File.create({cloudId: fileInfo.etag, drive: 's3', mimeType: new_photo?.extname, path: `profileImages/${name}`, size: fileInfo.size})
+        const url = await Drive.getSignedUrl(`profileImages/${name}`)
+        await UserPhoto.create({user_id: auth.user?.id, file_id: file.id, signedUrl:url})
+        return true;
+      }
+      
+    } catch (error) {
+      console.log(error)
+      response.status(500).json({error: "Erro"})
+    }
+  }
 
-      const new_photo = payload.photo;
-      const name = `${auth.user?.id}-${Date.now()}`;
-      await new_photo?.moveToDisk('profileImages',{
-        name
-      }, 's3')
-      const fileInfo = await Drive.getStats(`profileImages/${name}`)
-      file.cloudId = fileInfo.etag as string;
-      file.drive = 's3'
-      file.mimeType = new_photo.extname as string;
-      file.path = `profileImages/${name}`
-      file.size = fileInfo.size;
-      await file.save()
-      await Drive.delete(old_photo_path)
-      return true;
+  public async removePhoto({ auth, response, request }: HttpContextContract){
+    try {
+      const user = await User.findOrFail(auth.user?.id)
+      const photo = await UserPhoto.findBy('user_id', user.id)
+      if(!!photo){
+        const file = await File.findOrFail(photo.file_id);
+        await Drive.delete(file.path)
+        await photo.delete()
+        return true;
+      }
+      return true
     } catch (error) {
       console.log(error)
       response.status(500).json({error: "Erro"})

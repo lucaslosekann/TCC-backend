@@ -34,7 +34,8 @@
     "@adonisjs/view",
     "@adonisjs/redis",
     "adonis-request-throttler",
-    "@adonisjs/session"
+    "@adonisjs/session",
+    "@adonisjs/ally"
   ],
   "aceProviders": [
     "@adonisjs/repl"

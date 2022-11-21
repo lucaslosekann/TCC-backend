@@ -10,6 +10,9 @@ export default class Rating extends BaseModel {
   public rating: number
 
   @column()
+  public price: number
+
+  @column()
   public comment: string
 
   @column()

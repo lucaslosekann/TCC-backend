@@ -6,7 +6,6 @@ const ServiceUpdateSchema = schema.create({
       extnames: ['png','jpg']
     })
   ),
-  suggestedPrice: schema.number.optional(),
   savedPhotos: schema.array.optional().anyMembers(),
   service: schema.number([
     rules.exists({table: 'services', column: 'id'})

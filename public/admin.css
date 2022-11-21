@@ -145,9 +145,12 @@ input[type="file"]{
   text-align: center;
 }
 
-/* When you move the mouse over the icon, change color */
-.fa-trash{
+
+.fa-trash, .fa-copy{
   color:white;
+}
+.fa-copy{
+  font-size: large;
 }
 .fa-trash:hover {
   color: red;

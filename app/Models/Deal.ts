@@ -14,9 +14,6 @@ export default class Deal extends BaseModel {
   public id: number
 
   @column()
-  public price: number
-
-  @column()
   public worker_id: number
 
   @column()
@@ -29,10 +26,10 @@ export default class Deal extends BaseModel {
   public offer_id: number
   
   @column()
-  public status: 'active' | 'closed'
+  public status: 'active' | 'closed' | 'cancelled'
 
-  @column.dateTime({ columnName: 'agreement_date' })
-  public agreementDate: DateTime
+  @column()
+  public cancelement_reason?: string
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime

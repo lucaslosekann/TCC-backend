@@ -9,9 +9,6 @@ export default class Service extends BaseModel {
   @column({ isPrimary: true })
   public id: number
 
-  @column({columnName: 'suggested_price'})
-  public suggestedPrice: number
-
   @column()
   public worker_id: number
 

@@ -22,12 +22,11 @@ Ws.io.on('connection', async (socket: Socket) => {
         const numClients = clients ? clients.size : 0;
         let offer;
         if(payload?.message_type == 'proposal'){
-          let {price, service_id, type} = JSON.parse(payload.text);
+          let {service_id, type} = JSON.parse(payload.text);
           const worker = await Worker.findBy('userId', payload.to);
           let data = {
             consumer_id: payload.from,
             worker_id: worker?.id,
-            price,
             type,
             service_id
           } as any;
@@ -84,21 +83,6 @@ Ws.io.on('connection', async (socket: Socket) => {
       socket.join(roomId)
 
       console.log(`User with ID ${user.id} joined room ${roomId}`);
-
-      const unReceivedMessages = await Message.query()
-      .select('*')
-      .where('to', user?.id)
-      .andWhere('room', roomId)
-      .andWhere('pending', true).exec()
-
-      if(unReceivedMessages.length > 0){
-        socket.emit("update", unReceivedMessages);
-        await Message.query()
-          .delete()
-          .where('to', user?.id)
-          .andWhere('room', roomId)
-          .andWhere('pending', true).exec()
-      }
       
     })
     socket.on('leave-room', (roomId)=>{

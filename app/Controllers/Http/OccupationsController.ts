@@ -6,6 +6,7 @@ import { randomUUID } from 'crypto';
 import Drive from '@ioc:Adonis/Core/Drive'
 import File from 'App/Models/File';
 import Database from '@ioc:Adonis/Lucid/Database';
+import Suggestion from 'App/Models/Suggestion';
 
 export default class OccupationsController {
   public async index({}: HttpContextContract) {
@@ -39,6 +40,12 @@ export default class OccupationsController {
         name: payload.occupation_name,
         occupation_photo: file_id
       });
+
+
+      const suggestion = await Suggestion.findBy('suggestion_name', payload.occupation_name);
+      if(!!suggestion){
+        await suggestion.delete()
+      }
       response.redirect('/');
     } catch (error) {
       session.flash('error', 'Erro')
@@ -53,6 +60,8 @@ export default class OccupationsController {
           uQuery.preload('userPhoto', photoQuery => photoQuery.preload('file'))
         }).withCount('deals').select(
           Database.from('deals').join('ratings', 'deals.id', 'ratings.deal_id').whereColumn('workers.id','deals.worker_id').avg('ratings.rating').limit(1).as('avg')
+        ).select(
+          Database.from('deals').join('ratings', 'deals.id', 'ratings.deal_id').whereColumn('workers.id','deals.worker_id').avg('ratings.price').limit(1).as('price')
         )
       }).where('active', true)
     })).select('*').where('id', request.params().id).firstOrFail();

@@ -11,4 +11,10 @@ export const FinishDealSchema = schema.create({
     rules.maxLength(200)
   ])
 })
+export const CancelDealSchema = schema.create({
+  deal_id: schema.number(),
+  reason: schema.string([
+    rules.maxLength(255)
+  ])
+})
 export default DealSchema

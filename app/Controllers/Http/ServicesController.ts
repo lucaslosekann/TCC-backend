@@ -36,7 +36,6 @@ export default class ServicesController {
     try {
       const body = request.body()
       const parsed = {
-        suggestedPrice: body.suggestedPrice,
         worker_occupation: {
           worker_id: parseInt(body.worker_id),
           occupation_id: parseInt(body.occupation_id)
@@ -53,8 +52,7 @@ export default class ServicesController {
         }
         const service = await Service.create({
           occupation_id: temp.worker_occupation.occupation_id,
-          worker_id: temp.worker_occupation.worker_id,
-          suggestedPrice: temp?.suggestedPrice
+          worker_id: temp.worker_occupation.worker_id
         })
         if (temp?.photos?.length != 0 && !!temp.photos) {
           for (let i = 0; i < temp.photos.length; i++) {
@@ -137,8 +135,6 @@ export default class ServicesController {
             await ServicePhoto.create({ service_id: service.id, file_id: file.id })
           }
         }
-        const payload = { suggestedPrice: temp.suggestedPrice };
-        await service.merge(payload).save()
         return service;
       } else {
         return response.status(401).json({ error: 'Serviço não pertencente ao usuário logado' })

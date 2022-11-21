@@ -47,4 +47,10 @@ export default Env.rules({
 	LOGS_PASS: Env.schema.string(),
 
 	SESSION_DRIVER: Env.schema.string(),
+
+	GOOGLE_CLIENT_ID: Env.schema.string(),
+	GOOGLE_CLIENT_SECRET: Env.schema.string(),
+
+	FACEBOOK_CLIENT_ID: Env.schema.string(),
+	FACEBOOK_CLIENT_SECRET: Env.schema.string(),
 })
