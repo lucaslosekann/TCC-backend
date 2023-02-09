@@ -9,11 +9,11 @@ import Database from '@ioc:Adonis/Lucid/Database';
 import Suggestion from 'App/Models/Suggestion';
 
 export default class OccupationsController {
-  public async index({}: HttpContextContract) {
-    let occ = await Occupation.query().preload('occupationPhoto').select('*').exec(); 
+  public async index({ }: HttpContextContract) {
+    let occ = await Occupation.query().preload('occupationPhoto').select('*').exec();
     for (let i in occ) {
       let o = occ[i];
-      if(o.occupationPhoto){
+      if (o.occupationPhoto) {
         let path = await Drive.getSignedUrl(o.occupationPhoto.path)
         occ[i].occupationPhoto.path = path
       }
@@ -27,7 +27,7 @@ export default class OccupationsController {
         schema: OccupationSchema
       });
       let file_id;
-      if(!!payload.photo){
+      if (!!payload.photo) {
         const name = `${payload.occupation_name}-${randomUUID()}-${Date.now()}`;
         await payload.photo.moveToDisk('occupationPhotos', {
           name
@@ -43,7 +43,7 @@ export default class OccupationsController {
 
 
       const suggestion = await Suggestion.findBy('suggestion_name', payload.occupation_name);
-      if(!!suggestion){
+      if (!!suggestion) {
         await suggestion.delete()
       }
       response.redirect('/');
@@ -54,28 +54,67 @@ export default class OccupationsController {
   }
 
   public async show({ request }: HttpContextContract) {
-    let occupation = await Occupation.query().preload('services', (sQuery =>{
-      sQuery.preload('worker', async (wQuery)=>{
-        wQuery.preload('user', uQuery=>{
-          uQuery.preload('userPhoto', photoQuery => photoQuery.preload('file'))
-        }).withCount('deals').select(
-          Database.from('deals').join('ratings', 'deals.id', 'ratings.deal_id').whereColumn('workers.id','deals.worker_id').avg('ratings.rating').limit(1).as('avg')
-        ).select(
-          Database.from('deals').join('ratings', 'deals.id', 'ratings.deal_id').whereColumn('workers.id','deals.worker_id').avg('ratings.price').limit(1).as('price')
-        )
-      }).where('active', true)
-    })).select('*').where('id', request.params().id).firstOrFail();
-
-    for (let i in occupation.services) {
-      let s = occupation.services[i];
-      if(s.worker.user.userPhoto){
-        let path = await Drive.getSignedUrl(s.worker.user.userPhoto.file.path)
-        occupation.services[i].worker.user.userPhoto.file.path = path;
-      }
-      console.log(occupation.services[i].worker)
+    const lat = request.qs().lat;
+    const lon = request.qs().lon;
+    if(lat == null || lon == null){
+      return false;
     }
-    
-    return occupation;
+    const occupation = await Occupation.findOrFail(request.params().id);
+    let services = await Database.rawQuery(`
+    select * from (
+      select (6371 * acos(
+    cos(radians(a.lat))*
+    cos(radians(?)) *
+    cos(radians(a.lon) - 
+            radians(?)) +
+    sin(radians(a.lat)) *
+    sin(radians(?)))) as d, users.name, a.radius, a.radius_unlimited, services.id,
+    (select path from files
+      inner join user_photos on user_photos.file_id = files.id
+      where user_photos.user_id = users.id),
+    (select json_build_object('rating',avg(rating),'price', avg(price), 'count', count(deals.*)) as rating from deals 
+    inner join ratings on ratings.deal_id = deals.id
+    where deals.worker_id = workers.id) as rating
+    from services
+  inner join workers on workers.id = services.worker_id
+  inner join users on workers.user_id = users.id
+  inner join addresses a on users.id = a.user_id
+  where services.occupation_id = ?) as temp
+  where d < radius OR radius_unlimited = true
+    `, [
+      lat,
+      lon,
+      lat,
+      request.params().id
+    ]).exec();
+    services = services.rows
+
+
+    let promiseQueue = [] as any;
+    const getSignedUrl = async(id, path) =>{
+      const signed = await Drive.getSignedUrl(path);
+      return{
+        id, path: signed
+      }
+    }
+
+    for (let i in services) {
+      if(services[i].path){
+        promiseQueue.push(getSignedUrl(services[i].id, services[i].path));
+      }
+    }
+
+    const paths = await Promise.all(promiseQueue);
+    for (let i in services) {
+      if(services[i].path){
+        services[i].path = paths.find((v)=> v.id === services[i].id).path;
+      }
+    }
+
+    return {
+      ...occupation.toJSON(),
+      services
+    };
   }
 
   public async update({ request, response, session }: HttpContextContract) {
@@ -88,35 +127,35 @@ export default class OccupationsController {
         name: payload.occupation_name
       } as any;
 
-      if(payload.nochange){
+      if (payload.nochange) {
         await editing.merge(newOcc).save()
         return response.redirect('/');
       }
-      if(!!payload.photo){
+      if (!!payload.photo) {
         const name = `${payload.occupation_name}-${randomUUID()}-${Date.now()}`;
         await payload.photo.moveToDisk('occupationPhotos', {
           name
         }, 's3')
         const fileInfo = await Drive.getStats(`occupationPhotos/${name}`)
         const file = await File.create({ cloudId: fileInfo.etag, drive: 's3', mimeType: payload.photo?.extname, path: `occupationPhotos/${name}`, size: fileInfo.size })
-        if(editing.occupation_photo){
+        if (editing.occupation_photo) {
           const old_photo = await File.findOrFail(editing.occupation_photo);
           newOcc.occupation_photo = file.id
           await editing.merge(newOcc).save()
           await Drive.delete(old_photo.path);
           await old_photo.delete();
-        }else{
+        } else {
           newOcc.occupation_photo = file.id
           await editing.merge(newOcc).save()
         }
-      }else{
-        if(editing.occupation_photo){
+      } else {
+        if (editing.occupation_photo) {
           const old_photo = await File.findOrFail(editing.occupation_photo);
           newOcc.occupation_photo = null;
           await editing.merge(newOcc).save()
           await Drive.delete(old_photo.path);
           await old_photo.delete()
-        }else{
+        } else {
           await editing.merge(newOcc).save()
         }
       }
@@ -131,17 +170,17 @@ export default class OccupationsController {
   public async destroy({ request, response, session }: HttpContextContract) {
     try {
       const occupation = await Occupation.query().preload('occupationPhoto').select('*').where('id', request.qs().id).firstOrFail()
-      if(occupation.occupationPhoto){
+      if (occupation.occupationPhoto) {
         Drive.delete(occupation.occupationPhoto.path)
       }
       await occupation.delete();
       return response.redirect('/');
-    } catch (e) { 
+    } catch (e) {
       session.flash('error', 'Erro')
       console.log(e)
     }
   }
-  public async showByid({request}: HttpContextContract){
+  public async showByid({ request }: HttpContextContract) {
     const occupation = await Occupation.findOrFail(request.params().id);
     return occupation;
   }

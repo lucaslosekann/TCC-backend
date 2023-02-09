@@ -110,6 +110,41 @@
           @end
         </ul>
       </div>
+      <div class="form_container">
+        <h2>Adicionar Administrador</h2>
+        <form action="add_admin" method="post" enctype="multipart/form-data">
+          <div class="input">
+            <label for="occupation_name">Email do usuário:</label>
+            <input type="email" required name="email" placeholder="Ex: usuario@email.com">
+          </div>
+          <button type="submit">Enviar</button>
+          @if(adm_error)
+            <span class="errorMessage">{{adm_error}}</span>
+          @endif
+        </form>
+        <div class="list_container" style="margin-top: 10px;">
+          <ul>
+            @each((adm, i) in admins)
+              <li 
+              @if(i%2 == 0)
+                class="even"           
+              @else
+                class="odd"           
+              @endif
+              > 
+                <div class="left">
+                  <span>
+                    {{ adm.name }}
+                  </span>
+                </div>
+                <div class="right">
+                  <button class="del" onclick="if(confirm('Tem certeza?'))window.location.href = 'remove_admin/{{adm.id}}'"><i class="fa-solid fa-trash"></i></button>
+                </div>
+              </li>
+            @end
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
 </body>

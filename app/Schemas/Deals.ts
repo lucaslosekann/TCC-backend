@@ -4,6 +4,7 @@ const DealSchema = schema.create({
 })
 export const FinishDealSchema = schema.create({
   deal_id: schema.number(),
+  price: schema.number(),
   rating: schema.number([
     rules.range(1, 5)
   ]),

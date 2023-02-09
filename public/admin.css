@@ -43,6 +43,8 @@ h2{
   text-align: center;
 }
 button[type='submit']{
+  margin: auto;
+  width: 95%;
   margin-top: 10px;
 }
 form{
@@ -215,6 +217,10 @@ li .right .fa-solid{
   margin-bottom: 10px;
 }
 
+ul{
+  padding: 0;
+  margin: 0;
+}
 
 
 @media (max-width: 800px)

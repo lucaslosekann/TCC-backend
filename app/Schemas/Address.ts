@@ -20,23 +20,12 @@ const AddressStoreSchema = schema.create({
   ])
 })
 const AddressUpdateSchema = schema.create({
-  zipCode: schema.string.optional({}, [
-    rules.maxLength(9)
+  label: schema.string.optional(),
+  radius: schema.number.optional([
+    rules.range(5, 205)
   ]),
-  street: schema.string.optional({}, [
-    rules.maxLength(100)
-  ]),
-  number: schema.string.optional({}, [
-    rules.maxLength(5)
-  ]),
-  complement: schema.string.optional({}, [
-    rules.maxLength(20)
-  ]),
-  city: schema.string.optional({}, [
-    rules.maxLength(50)
-  ]),
-  state: schema.string.optional({}, [
-    rules.maxLength(50)
-  ])
+  radius_unlimited: schema.boolean.optional(),
+  lat: schema.number(),
+  lon: schema.number()
 })
 export  {AddressStoreSchema, AddressUpdateSchema}

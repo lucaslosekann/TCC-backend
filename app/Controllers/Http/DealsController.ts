@@ -101,7 +101,8 @@ export default class DealsController {
       const rating = Rating.create({
         comment: payload.comment,
         rating: payload.rating,
-        deal_id: payload.deal_id
+        deal_id: payload.deal_id,
+        price: payload.price
       })
       const userWorker = await Worker.findOrFail(deal.worker_id);
       const receiver = await User.findOrFail(userWorker.userId)

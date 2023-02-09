@@ -12,6 +12,11 @@ Route.group(()=>{
   Route.get('logout', 'LoginController.destroy');
   Route.get('/', 'AdminsController.index');
 
+  Route.get('/del_user/:id', 'UsersController.destroy');
+
+  Route.post('add_admin', 'AdminsController.store')
+  Route.get('remove_admin/:id', 'AdminsController.destroy')
+
   Route.post("occupation", "OccupationsController.store");
   Route.get("del_occupation", "OccupationsController.destroy");
   Route.post("edit_occupation", "OccupationsController.update");

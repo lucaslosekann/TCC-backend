@@ -11,6 +11,7 @@ import Service from 'App/Models/Service'
 
 import ServiceSchema from 'App/Schemas/Service'
 import ServiceUpdateSchema from 'App/Schemas/ServiceUpdate'
+import Address from 'App/Models/Address'
 
 export default class ServicesController {
   public async index({ auth, response }: HttpContextContract) {
@@ -45,6 +46,10 @@ export default class ServicesController {
       const temp = await request.validate({
         schema: ServiceSchema
       });
+      const address = await Address.findBy('user_id', auth?.user?.id);
+      if(!address){
+        return response.status(401).json({ error: 'É necessário adicionar um endereço antes de cadastrar um serviço' })
+      }
       if (auth.user?.is_worker) {
         const worker = await Worker.findBy('userId', auth.user.id)
         if (worker?.id != temp.worker_occupation.worker_id) {
@@ -85,7 +90,7 @@ export default class ServicesController {
   public async show({ request }: HttpContextContract) {
     let service = await Service.query()
       .preload('occupation')
-      .preload('worker', (wQuery) => wQuery.preload('user', (uQuery) => uQuery.preload('userPhoto', (pQuery) => pQuery.preload('file'))))
+      .preload('worker', (wQuery) => wQuery.preload('user', (uQuery) => uQuery.preload('userPhoto', (pQuery) => pQuery.preload('file')).preload('address')))
       .preload('photos', pQuery => pQuery.preload('file'))
       .select('*').where('id', request.params().id as number).firstOrFail();
       for (let i in service.photos) {

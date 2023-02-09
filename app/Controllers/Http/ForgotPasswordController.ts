@@ -30,18 +30,20 @@ export default class ForgotPasswordsController {
           type: 'forgotpassword',
           name: 'Random Bytes Token'
         })
-
+        
         await Mail.send((message) => {
           message
-            .from('jobhub@jobhub.com.br')
-            .to(payload.email)
-            .subject('Seu código de recuperação da conta do Jobhub é: '+ token)
-            .htmlView('emails/forgotpassword', {name: user.name, token})
+          .from('jobhub@jobhub.com.br')
+          .to(payload.email)
+          .subject('Seu código de recuperação da conta do Jobhub é: '+ token)
+          .htmlView('emails/forgotpassword', {name: user.name, token})
         }).then((a)=>{
           console.log(a)
+          console.log('ZZZZZZZZZZZZz')
         })
       }catch(e){
         console.log(e)
+        console.log('BBBBBBBBBBBb')
       }
     } catch (e) {
       return response.status(404).json({error: "Não existe um usuário cadastrado com esse email"});

@@ -7,6 +7,9 @@ import UserUpdateSchema from 'App/Schemas/UserUpdate';
 import notificate from 'App/Services/PushNotifications';
 import axios from 'axios';
 import Drive from '@ioc:Adonis/Core/Drive'
+import Worker from 'App/Models/Worker';
+import UserPhoto from 'App/Models/UserPhoto';
+import Address from 'App/Models/Address';
 
 export default class UsersController {
   public async index({}: HttpContextContract) {}
@@ -31,7 +34,23 @@ export default class UsersController {
     return user;
   }
 
-  public async destroy({}: HttpContextContract) {}
+  public async destroy({request}: HttpContextContract) {
+    const id = request.params().id;
+    try {
+      const user = await User.findOrFail(id);
+      const worker = await Worker.findBy('user_id', id);
+      const photo = await UserPhoto.findBy('user_id', id);
+      const address = await Address.findBy('user_id', id);
+      await worker?.delete()
+      await photo?.delete()
+      await address?.delete()
+      await user.delete()
+      return true
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  }
 
   public async updateNotificationToken( {request, auth} : HttpContextContract){
     const { token } = await request.validate({

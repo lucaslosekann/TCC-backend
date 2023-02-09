@@ -34,8 +34,6 @@ export default class AddressesController {
     const payload = await request.validate({
       schema: AddressUpdateSchema
     })
-    delete Object.assign(payload, {['zip_code']: payload['zipCode'] })['zipCode'];
-    console.log(payload)
     const address = await Address.updateOrCreate({'user_id': auth.user?.id as number}, {...payload, user_id: auth.user?.id});
     return address;
   }

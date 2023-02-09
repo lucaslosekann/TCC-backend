@@ -13,6 +13,8 @@ export default class RatingsController {
     const payload = await request.validate({
       schema: RatingsSchema
     });
+    console.log(payload);
+    return
     const newSchema = await Rating.create(payload);
     return newSchema;
   }

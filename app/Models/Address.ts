@@ -3,26 +3,25 @@ import { BaseModel, belongsTo, BelongsTo, column } from '@ioc:Adonis/Lucid/Orm'
 import User from 'App/Models/User';
 
 export default class Address extends BaseModel {
+  public serializeExtras = true
+  
   @column({ isPrimary: true })
   public id: number
 
-  @column({columnName: 'zip_code'})
-  public zipCode: string
+  @column()
+  public label?: string
 
   @column()
-  public street: string
+  public lat: number
 
   @column()
-  public number: string
+  public lon: number
 
   @column()
-  public complement: string
+  public radius: number
 
   @column()
-  public city: string
-
-  @column()
-  public state: string
+  public radius_unlimited: boolean
 
   @column()
   public user_id: number
